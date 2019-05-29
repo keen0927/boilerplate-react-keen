@@ -1,0 +1,74 @@
+const path = require('path');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = (env, options) => {
+  const config = {
+    entry: {
+      app: ['./src/index.js']
+    },
+    output: {
+      filename: "bundle.js",
+      path: path.resolve(__dirname + "/dist")
+    },
+    module: {
+      rules: [
+        {
+          test: /\.(js|jsx)$/,
+          exclude: "/node_modules",
+          use: ['babel-loader'],
+        },
+        {
+          test: /\.html$/,
+          use: [
+            {
+              loader: "html-loader",
+              options: { minimize: true }
+            }
+          ]
+        }
+      ]
+    },
+    optimization: {
+      // splitChunks: {
+      //   cacheGroups: {
+      //     commons: {
+      //       test: /[\\/]node_modules[\\/]/,
+      //       name: 'vendors',
+      //       chunks: 'all'
+      //     }
+      //   }
+      // }
+    }    
+	}
+	if(options.mode === 'development') {
+		// Development
+    config.plugins = [
+      new webpack.HotModuleReplacementPlugin(),
+      new HtmlWebpackPlugin({
+        title: 'Development',
+        showErrors: true
+      })
+    ];
+
+    config.devtool = 'inline-source-map';
+
+    config.devServer = {
+      hot: true, 
+      host: '0.0.0.0', 
+      port: 8080,
+      contentBase: __dirname + "/public/",
+      stats: {
+        color: true
+      }
+    };
+	} else {
+    // Production
+    config.plugins = [
+      new CleanWebpackPlugin(['dist'])
+    ];
+	}	
+
+  return config;
+}
